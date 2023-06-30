@@ -12,11 +12,17 @@ import (
 
 func main() {
 	// Make request
-	response, err := http.Get("https://cat-fact.herokuapp.com/facts")
+	request, err := http.NewRequest("GET", "https://cat-fact.herokuapp.com/facts", nil)
 	if err != nil {
 		fmt.Print(err.Error())
 		os.Exit(1)
 	}
+
+	request.Header.Set("Accept", "application/json")
+
+	client := &http.Client{}
+
+	response, err := client.Do(request)
 
 	if response.StatusCode != 200 {
 		fmt.Println("Error!, Status is not 200!")
