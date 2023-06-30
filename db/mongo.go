@@ -34,3 +34,13 @@ func InsertFact(client *mongo.Client, fact types.Fact, dbName, collectionName st
 	fmt.Printf("Fact inserted successfully into %s.%s\n", dbName, collectionName)
 	return nil
 }
+
+func DumpCollection(client *mongo.Client, dbName string, collectionName string) error {
+	collection := client.Database(dbName).Collection(collectionName)
+
+	_, err := collection.DeleteMany(context.Background(), bson.M{})
+	if err != nil {
+		return err
+	}
+	return nil
+}
