@@ -7,10 +7,19 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/fcanmekikoglu/go_experiment/db"
 	"github.com/fcanmekikoglu/go_experiment/types"
+	"github.com/joho/godotenv"
 )
 
 func main() {
+	// Load environment variables
+	err := godotenv.Load()
+	if err != nil {
+		fmt.Print("Error loading .env file")
+		os.Exit(1)
+	}
+
 	// Make request
 	request, err := http.NewRequest("GET", "https://cat-fact.herokuapp.com/facts", nil)
 	if err != nil {
@@ -44,9 +53,26 @@ func main() {
 	var facts []types.Fact
 	json.Unmarshal(responseData, &facts)
 
+	mongoURI := os.Getenv("MONGODB_URI")
+	if mongoURI == "" {
+		fmt.Print("MONGODB_URI not set in .env file")
+		os.Exit(1)
+	}
+
+	mongoClient, err := db.ConnectMongo(mongoURI)
+	if err != nil {
+		fmt.Println("Failed to connect MongoDB", err)
+		os.Exit(1)
+	}
+
 	// Iterate over facts
-	for i, fact := range facts {
-		fmt.Printf("Fact %d: %s\n", i+1, fact.Text)
+	for _, fact := range facts {
+		err = db.InsertFact(mongoClient, fact, "cat-api", "facts")
+		if err != nil {
+			fmt.Printf("Failed to insert fact: %s\n", err)
+			os.Exit(1)
+		}
+		// fmt.Printf("Fact %d: %s\n", i+1, fact.Text)
 	}
 
 	// // Create file
