@@ -20,6 +20,10 @@ func main() {
 
 	request.Header.Set("Accept", "application/json")
 
+	// This is how to add Bearer tokens
+	// token := "your-token"
+	// request.Header.Set("Authorization", "Bearer "+token)
+
 	client := &http.Client{}
 
 	response, err := client.Do(request)
